@@ -181,8 +181,8 @@ class WaveletTF(nn.Module):
             x_imag: [B, K, F, T]
 
         Output:
-            spec_emb: [B, (K+1), 1, D]
             temp_emb: [B, (K+1), 1, D]
+            spat_emb: [B, (K+1), 1, D]
         """
         batch_size = len(x_real)
 
