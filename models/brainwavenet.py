@@ -116,13 +116,13 @@ class TS_Encoder(nn.Module):
 
         # TemporalEnc in
         temp_in = temp_in.flatten(0, 1).transpose(1,2)  
-        temp_emb = self.spectral_linear_in(temp_emb)
+        temp_emb = self.temporal_linear_in(temp_emb)
         # TemporalEnc
-        temp_enc_out_real = self.spectral_encoder_layer_real(temp_emb.real) 
-        temp_enc_out_imag = self.spectral_encoder_layer_imag(temp_emb.imag)  
+        temp_enc_out_real = self.temporal_encoder_layer_real(temp_emb.real) 
+        temp_enc_out_imag = self.temporal_encoder_layer_imag(temp_emb.imag)  
         # TemporalEnc out
         temp_enc_out = torch.complex(temp_enc_out_real, temp_enc_out_imag) 
-        temp_out = self.spectral_linear_out(temp_enc_out) 
+        temp_out = self.temporal_linear_out(temp_enc_out) 
         temp_out = temp_out.view(-1, self.K, self.T, self.F+1).transpose(2,3) 
 
         # FCT slicing (first raw) + back to D
