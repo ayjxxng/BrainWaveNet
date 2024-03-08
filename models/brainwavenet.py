@@ -147,10 +147,10 @@ class WaveletTF(nn.Module):
         super().__init__()
         self.cfg = cfg
 
-        D = self.cfg.embed_dim # 128
-        F = self.cfg.n_frequencies # 5
-        K = self.cfg.n_channels # 200
-        T = self.cfg.n_times # 78
+        D = self.cfg.embed_dim 
+        F = self.cfg.n_frequencies 
+        K = self.cfg.n_channels 
+        T = self.cfg.n_times 
 
         # FCT: Frequency Class Token
         self.fct = nn.Parameter(torch.zeros((1, K, 1, T), dtype = cfloat)) 
