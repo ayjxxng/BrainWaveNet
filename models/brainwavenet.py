@@ -242,7 +242,6 @@ class BrainWaveNet(nn.Module):
         features_real = features[:, :, :, :, 0] 
         features_imag = features[:, :, :, :, 1] 
 
-        # Front-end model
         if self.cfg.front_end:
             features_real = features_real.permute(0, 3, 2, 1) 
             fe_out_real = self.fe_model(features_real)   
