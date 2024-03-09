@@ -66,7 +66,7 @@ def get_args():
 
     # wadb
     parser.add_argument('--wandb', type=bool, default=True)
-    parser.add_argument('--project', type=str, default='SpecTNT_Fourier_CWT_TR')
+    parser.add_argument('--project', type=str, default='BrainWaveNet')
 
     args = parser.parse_args()
     return args
