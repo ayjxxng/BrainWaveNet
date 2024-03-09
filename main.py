@@ -29,11 +29,11 @@ if args.is_training:
     for ii in range(args.itr):
         # setting record of experiments
         setting = '{}-S{}_{}-E{}-T{}_{}'.format(args.unique_id,
-                                            args.spectral_dmodel,
-                                            args.spectral_nheads,
-                                            args.embed_dim,
                                             args.temporal_dmodel,
-                                            args.temporal_nheads)
+                                            args.temporal_nheads,
+                                            args.embed_dim,
+                                            args.spatial_dmodel,
+                                            args.spatial_nheads)
         path = os.path.join(args.checkpoints, setting) 
         if not os.path.exists(path):
             os.makedirs(path)
