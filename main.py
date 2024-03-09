@@ -61,13 +61,13 @@ if args.is_training:
                                 "stride": args.stride,
 
                                 "embed_dim": args.embed_dim,
-                                "spectral_dmodel": args.spectral_dmodel,
-                                "spectral_nheads": args.spectral_nheads,
-                                "spectral_dimff": args.spectral_dimff,
-
                                 "temporal_dmodel": args.temporal_dmodel,
                                 "temporal_nheads": args.temporal_nheads,
                                 "temporal_dimff": args.temporal_dimff,
+
+                                "spatial_dmodel": args.spatial_dmodel,
+                                "spatial_nheads": args.spatial_nheads,
+                                "spatial_dimff": args.spatial_dimff,
 
                                 "dropout": args.dropout,
                                 "n_blocks": args.n_blocks,
@@ -80,8 +80,8 @@ if args.is_training:
                         reinit=True,
                         tags=[args.unique_id,
                             f"emb_d{args.embed_dim}",
-                            f"spe_d{args.spectral_dmodel}",
-                            f"tem_d{args.temporal_dmodel}"])
+                            f"tem_d{args.temporal_dmodel}",
+                            f"spa_d{args.temporal_dmodel}"])
             print(f"<<<<<<<<<<<<< Fold[{kk+1}/{args.n_fold}] >>>>>>>>>>>>>")
             train_loader= get_dataloader(args, train_val_data[train_index], train_val_labs[train_index], shuffle=True)
             val_loader= get_dataloader(args, train_val_data[val_index], train_val_labs[val_index], shuffle=False)
