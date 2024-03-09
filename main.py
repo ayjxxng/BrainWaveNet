@@ -81,7 +81,7 @@ if args.is_training:
                         tags=[args.unique_id,
                             f"emb_d{args.embed_dim}",
                             f"tem_d{args.temporal_dmodel}",
-                            f"spa_d{args.temporal_dmodel}"])
+                            f"spa_d{args.spatial_dmodel}"])
             print(f"<<<<<<<<<<<<< Fold[{kk+1}/{args.n_fold}] >>>>>>>>>>>>>")
             train_loader= get_dataloader(args, train_val_data[train_index], train_val_labs[train_index], shuffle=True)
             val_loader= get_dataloader(args, train_val_data[val_index], train_val_labs[val_index], shuffle=False)
