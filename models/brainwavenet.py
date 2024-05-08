@@ -4,9 +4,9 @@ import torch.nn.functional as F
 from torch import nn, Tensor, cfloat
 
 
-class Res2DMaxPoolModule(nn.Module):
+class Res2DModule(nn.Module):
     def __init__(self, cfg):
-        super(Res2DMaxPoolModule, self).__init__()
+        super().__init__()
         self.in_channels = cfg.in_channels
         self.out_channels = cfg.out_channels
         self.pooling = cfg.pooling
@@ -116,7 +116,7 @@ class TS_Encoder(nn.Module):
 
         # TemporalEnc in
         temp_in = temp_in.flatten(0, 1).transpose(1,2)  
-        temp_emb = self.temporal_linear_in(temp_emb)
+        temp_emb = self.temporal_linear_in(temp_in)
         # TemporalEnc
         temp_enc_out_real = self.temporal_encoder_layer_real(temp_emb.real) 
         temp_enc_out_imag = self.temporal_encoder_layer_imag(temp_emb.imag)  
@@ -220,7 +220,7 @@ class BrainWaveNet(nn.Module):
         self.use_tct = self.cfg.use_tct
 
         # Front-end model
-        self.fe_model = Res2DMaxPoolModule(self.cfg)
+        self.fe_model = Res2DModule(self.cfg)
 
         # Main model
         self.main_model = WaveletTF(self.cfg)  
