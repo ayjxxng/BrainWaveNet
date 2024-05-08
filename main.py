@@ -22,6 +22,11 @@ np.random.seed(fix_seed)
 
 args = get_args()
 
+train_val_CWT = pickle.load(open(args.dataset.path + 'train_val_CWT_TR.pkl', 'rb'))
+train_val_data, train_val_labs, train_val_keys = train_val_CWT
+test_CWT = pickle.load(open(args.dataset.path + 'test_CWT_TR.pkl', 'rb'))
+test_data, test_labs, test_keys = test_CWT
+
 with open_dict(args):
     args.unique_id = datetime.now().strftime("%d-%H%M")
 
