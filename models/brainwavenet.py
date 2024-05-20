@@ -220,7 +220,8 @@ class BrainWaveNet(nn.Module):
         self.use_tct = self.cfg.use_tct
 
         # Front-end model
-        self.fe_model = Res2DModule(self.cfg)
+        self.fe_model_real = Res2DModule(self.cfg)
+        self.fe_model_imag = Res2DModule(self.cfg)
 
         # Main model
         self.main_model = WaveletTF(self.cfg)  
@@ -244,9 +245,9 @@ class BrainWaveNet(nn.Module):
 
         if self.cfg.front_end:
             features_real = features_real.permute(0, 3, 2, 1) 
-            fe_out_real = self.fe_model(features_real)   
+            fe_out_real = self.fe_model_real(features_real)   
             features_imag = features_imag.permute(0, 3, 2, 1) 
-            fe_out_imag = self.fe_model(features_imag)   
+            fe_out_imag = self.fe_model_imag(features_imag)   
         else:
             fe_out_real = features_real.permute(0, 3, 2, 1) 
             fe_out_imag = features_imag.permute(0, 3, 2, 1) 
