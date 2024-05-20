@@ -1,6 +1,6 @@
 # BrainWaveNet: Wavelet-based Transformer for Autism Spectrum Disorder Diagnosis
 
-| Method | AUC | ACC (%) | SEN (%) | SPC (%) |
+| Method | AUC | ACC (%) | SEN (%) | SPC (%) |
 | :---: | :---: | :---: | :---: | :---: |
 | BrainNetCNN  | 0.6428±0.01 | 62.06±1.12 | 35.48±4.56 | 82.36±3.25 |
 | BrainNetTF   | 0.6886±0.03 | 63.71±2.43 | 43.10±13.71 | 79.45±10.65 |
