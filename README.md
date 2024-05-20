@@ -1,5 +1,6 @@
 # BrainWaveNet: Wavelet-based Transformer for Autism Spectrum Disorder Diagnosis
 
+Dataset: ADHD-200
 | Method | AUC | ACC (%) | SEN (%) | SPC (%) |
 | :---: | :---: | :---: | :---: | :---: |
 | BrainNetCNN  | 0.6428±0.01 | 62.06±1.12 | 35.48±4.56 | 82.36±3.25 |
