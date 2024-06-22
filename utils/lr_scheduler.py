@@ -10,7 +10,7 @@ class LRScheduler:
         self.lr_config = optimizer_cfg.lr_scheduler
         self.training_config = cfg
         self.lr = optimizer_cfg.lr
-        assert self.lr_config.mode in ['cos', 'linear'], "Invalid mode for learning rate scheduler"
+        assert self.lr_config.mode in ['cos', 'linear'], "Invalid mode for LRScheduler"
 
     def update(self, optimizer: torch.optim.Optimizer, step: int) -> None:
         lr_config = self.lr_config
