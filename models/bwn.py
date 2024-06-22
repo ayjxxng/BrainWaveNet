@@ -1,6 +1,7 @@
+from typing import Tuple
 import torch
-from omegaconf import DictConfig
 from torch import nn, cfloat
+from omegaconf import DictConfig
 from models.module import TemporalEnc, SpatialEnc, Res2DModule
 
 device = torch.device("cuda")
@@ -10,11 +11,9 @@ class TS_Encoder(nn.Module):
     def __init__(
             self,
             cfg: DictConfig
-    ):
+    ) -> None:
         super().__init__()
-
-        self.cfg = cfg.model
-        self.D = self.cfg.embed_dim
+        self.D = cfg.model.embed_dim
         self.F = cfg.dataset.n_frequencies
         self.N = cfg.dataset.n_channels + 1  # 1 for SCT
         self.T = cfg.dataset.n_times
@@ -29,7 +28,11 @@ class TS_Encoder(nn.Module):
         # Spatial Transformer Encoder (SpatialEnc)
         self.spatial_blocks = SpatialEnc(cfg)
 
-    def forward(self, temp_emb, spat_emb):
+    def forward(
+            self,
+            temp_emb: torch.Tensor,
+            spat_emb: torch.Tensor
+    ) -> Tuple[torch.Tensor, torch.Tensor]:
         """
         Inputs:
             temp_emb: temporal embedding input [B, N+1, F+1, T]
@@ -59,14 +62,12 @@ class WaveletTF(nn.Module):
     def __init__(
             self,
             cfg: DictConfig
-    ):
+    ) -> None:
         super().__init__()
-        self.cfg = cfg
-
-        D = self.cfg.model.embed_dim
-        F = self.cfg.dataset.n_frequencies
-        N = self.cfg.dataset.n_channels
-        T = self.cfg.dataset.n_times
+        D = cfg.model.embed_dim
+        F = cfg.dataset.n_frequencies
+        N = cfg.dataset.n_channels
+        T = cfg.dataset.n_times
 
         # FCT: Frequency Class Token
         self.fct = nn.Parameter(torch.zeros((1, N, 1, T), dtype=cfloat))
@@ -82,15 +83,15 @@ class WaveletTF(nn.Module):
 
         # WaveletTF blocks
         self.waveletTF_block = nn.ModuleList([
-            TS_Encoder(self.cfg)
-            for _ in range(self.cfg.model.n_blocks)
+            TS_Encoder(cfg)
+            for _ in range(cfg.model.n_blocks)
         ])
 
     def forward(
             self,
-            x_real,
-            x_imag
-    ):
+            x_real: torch.Tensor,
+            x_imag: torch.Tensor
+    ) -> Tuple[torch.Tensor, torch.Tensor]:
         """
         Input:
             x_real: [B, N, F, T]
@@ -125,29 +126,28 @@ class BrainWaveNet(nn.Module):
     def __init__(
             self,
             cfg: DictConfig
-    ):
+    ) -> None:
         super().__init__()
-        self.cfg = cfg
-
-        self.D = self.cfg.model.embed_dim
-        self.F = self.cfg.dataset.n_frequencies
-        self.N = self.cfg.dataset.n_channels
-        self.T = self.cfg.dataset.n_times
+        self.D = cfg.model.embed_dim
+        self.F = cfg.dataset.n_frequencies
+        self.N = cfg.dataset.n_channels
+        self.T = cfg.dataset.n_times
+        self.n_classes = cfg.dataset.n_classes
 
         # Residual Conv Block
-        self.fe_model_real = Res2DModule(self.cfg)
-        self.fe_model_imag = Res2DModule(self.cfg)
+        self.fe_model_real = Res2DModule(cfg)
+        self.fe_model_imag = Res2DModule(cfg)
 
         # Main model
-        self.main_model = WaveletTF(self.cfg)
+        self.main_model = WaveletTF(cfg)
 
         # Linear layer
-        self.linear_out = nn.Linear(self.D * 2, self.cfg.dataset.n_classes)
+        self.linear_out = nn.Linear(self.D * 2, self.n_classes)
 
     def forward(
             self,
-            features
-    ):
+            features: torch.Tensor,
+    ) -> torch.Tensor:
         """
         Input:
             features: [B, T, F, N, 2] (Real&Imag)
