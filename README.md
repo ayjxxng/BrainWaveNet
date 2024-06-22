@@ -23,3 +23,12 @@ A. Jeong*, D. Heo*, E. Kang, and H.-I. Suk, “BrainWaveNet: Wavelet-based Tran
 | STAGIN (SERO)| 0.5520 ± 0.04 | 57.18 ± 1.62 | 34.91 ± 20.96 | 74.28 ± 13.70 |
 | BoIT         | 0.6748 ± 0.03 | 64.22 ± 3.04 | 49.52 ± 5.62 | 75.45 ± 1.11 |
 | BrainWaveNet (Ours) | **0.7330 ± 0.01** | **65.98 ± 2.28** | **59.52 ± 12.49** | 70.91 ± 7.47 |
+
+## Dependencies
+- python 3.10.14
+- pytorch 2.2.2
+- torchvision 0.17.2
+- torchaudio 2.2.2
+- scikit-learn 1.4.1
+- wandb 0.17.2
+- hydra-core 1.3.2
