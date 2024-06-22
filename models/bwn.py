@@ -38,7 +38,8 @@ class TS_Encoder(nn.Module):
             spat_emb: Spatial embedding output of shape [B, (N+1), 1, D]
         """
         # Element-wise addition between SE and FCT
-        temp_emb += nn.functional.pad(self.D_to_T(spat_emb), (0, 0, 0, self.F)).to(device)
+        temp_emb = temp_emb + \
+                   nn.functional.pad(self.D_to_T(spat_emb), (0, 0, 0, self.F)).to(device)
 
         # TemporalEnc
         temp_emb = self.temporal_blocks(temp_emb)
@@ -151,4 +152,3 @@ class BrainWaveNet(nn.Module):
         out = self.linear_out(out.reshape(out.size(0), -1))
 
         return out
-        
