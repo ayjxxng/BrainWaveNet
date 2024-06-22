@@ -151,3 +151,4 @@ class BrainWaveNet(nn.Module):
         out = self.linear_out(out.reshape(out.size(0), -1))
 
         return out
+        
