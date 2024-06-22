@@ -21,19 +21,6 @@ class ABIDE_Dataset(Dataset):
         return self.len
 
 
-class BNT_Dataset(Dataset):
-    def __init__(self, x_data: np.ndarray, y_data: np.ndarray) -> None:
-        self.x_data = torch.FloatTensor(x_data)
-        self.y_data = F.one_hot(torch.FloatTensor(y_data).to(torch.int64))
-        self.len = self.y_data.shape[0]
-
-    def __getitem__(self, index: int) -> Tuple[torch.Tensor, torch.Tensor]:
-        return self.x_data[index], self.y_data[index]
-
-    def __len__(self) -> int:
-        return self.len
-
-
 def get_dataloader(
         cfg: DictConfig,
         samples: np.ndarray,
