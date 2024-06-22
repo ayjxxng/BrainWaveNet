@@ -1,46 +1,38 @@
 import torch
-from omegaconf import DictConfig
 from torch import nn, Tensor, cfloat
 import torch.nn.functional as F
+from omegaconf import DictConfig
 
 device = torch.device("cuda")
 
 
 class Res2DModule(nn.Module):
-    def __init__(
-            self,
-            cfg: DictConfig
-    ) -> None:
+    def __init__(self, cfg: DictConfig) -> None:
         super().__init__()
         self.in_channels = cfg.model.in_channels
         self.out_channels = cfg.model.out_channels
         self.batch_norm = cfg.model.batch_norm
+
         self.conv_1 = nn.Conv2d(self.in_channels, self.out_channels, 3, padding=1)
         self.conv_2 = nn.Conv2d(self.out_channels, self.out_channels, 3, padding=1)
+        self.relu = nn.ReLU()
+
         if self.batch_norm:
             self.bn_1 = nn.BatchNorm2d(self.out_channels)
             self.bn_2 = nn.BatchNorm2d(self.out_channels)
-        self.relu = nn.ReLU()
 
-    def forward(
-            self, 
-            x: torch.Tensor
-    ) -> torch.Tensor:
+    def forward(self, x: torch.Tensor) -> torch.Tensor:
         out = self.conv_1(x)
         if self.batch_norm:
             out = self.bn_1(out)
         out = self.conv_2(self.relu(out))
         if self.batch_norm:
             out = self.bn_2(out)
-        out = x + out
-        return out
+        return x + out
 
 
 class TemporalEnc(nn.Module):
-    def __init__(
-            self,
-            cfg: DictConfig
-    ) -> None:
+    def __init__(self, cfg: DictConfig) -> None:
         super().__init__()
         self.cfg = cfg.model
         self.D = self.cfg.embed_dim
@@ -65,10 +57,7 @@ class TemporalEnc(nn.Module):
         ])
         self.temporal_linear_out = nn.Linear(self.cfg.temporal_dmodel, self.F + 1, dtype=cfloat)
 
-    def forward(
-            self, 
-            temp_in: torch.Tensor
-    ) -> torch.Tensor:
+    def forward(self, temp_in: torch.Tensor) -> torch.Tensor:
         """
         Inputs:
             temp_in: temporal embedding input [B, N+1, F+1, T]
@@ -79,13 +68,14 @@ class TemporalEnc(nn.Module):
         # TemporalEnc in
         temp_in = temp_in.flatten(0, 1).transpose(1, 2)
         temp_emb = self.temporal_linear_in(temp_in)
+
         # TemporalEnc
-        temp_emb_real = temp_emb.real
-        temp_emb_imag = temp_emb.imag
+        temp_emb_real, temp_emb_imag = temp_emb.real, temp_emb.imag
         for layer_real, layer_imag in zip(self.temporal_encoder_layers_real, self.temporal_encoder_layers_imag):
             temp_emb_real = layer_real(temp_emb_real)
             temp_emb_imag = layer_imag(temp_emb_imag)
         temp_emb = torch.complex(temp_emb_real, temp_emb_imag)
+
         # TemporalEnc out
         temp_out = self.temporal_linear_out(temp_emb)
         temp_out = temp_out.view(-1, self.N, self.T, self.F + 1).transpose(2, 3)
@@ -94,10 +84,7 @@ class TemporalEnc(nn.Module):
 
 
 class SpatialEnc(nn.Module):
-    def __init__(
-            self,
-            cfg: DictConfig
-    ) -> None:
+    def __init__(self, cfg: DictConfig) -> None:
         super().__init__()
         self.cfg = cfg.model
         self.D = self.cfg.embed_dim
@@ -122,10 +109,7 @@ class SpatialEnc(nn.Module):
         ])
         self.spatial_linear_out = nn.Linear(self.cfg.spatial_dmodel, self.D, dtype=cfloat, device=device)
 
-    def forward(
-            self, 
-            spat_in: torch.Tensor
-    ) -> torch.Tensor:
+    def forward(self, spat_in: torch.Tensor) -> torch.Tensor:
         """
         Inputs:
             spat_in: spatial embedding input [B, N+1, 1, D]
@@ -136,12 +120,14 @@ class SpatialEnc(nn.Module):
         # SpatialEnc in
         spat_in = spat_in.permute(0, 2, 1, 3).flatten(0, 1)
         spat_emb = self.spatial_linear_in(spat_in)
+
         # SpatialEnc
         spat_enc_out_real = spat_emb.imag
         spat_enc_out_imag = spat_emb.real
         for layer_real, layer_imag in zip(self.spatial_encoder_layers_real, self.spatial_encoder_layers_imag):
             spat_enc_out_real = layer_real(spat_enc_out_real, spat_emb.real, spat_emb.real)
             spat_enc_out_imag = layer_imag(spat_enc_out_imag, spat_emb.imag, spat_emb.imag)
+
         # SpatialEnc out
         spat_enc_out = torch.complex(spat_enc_out_real, spat_enc_out_imag)
         spat_out = self.spatial_linear_out(spat_enc_out)
@@ -152,18 +138,9 @@ class SpatialEnc(nn.Module):
 
 class Cross_TransformerEncoderLayer(nn.TransformerEncoderLayer):
     def __init__(
-            self,
-            d_model: int,
-            nhead: int,
-            dim_feedforward: int = 2048,
-            dropout: float = 0.1,
-            activation=F.relu,
-            layer_norm_eps: float = 1e-5,
-            batch_first: bool = False,
-            norm_first: bool = False,
-            bias: bool = True,
-            device=None,
-            dtype=None
+            self, d_model: int, nhead: int, dim_feedforward: int = 2048, dropout: float = 0.1,
+            activation=F.relu, layer_norm_eps: float = 1e-5, batch_first: bool = False,
+            norm_first: bool = False, bias: bool = True, device=None, dtype=None
     ) -> None:
         super().__init__(d_model, nhead, dim_feedforward, dropout, activation,
                          layer_norm_eps, batch_first, norm_first, device, dtype)
@@ -172,8 +149,7 @@ class Cross_TransformerEncoderLayer(nn.TransformerEncoderLayer):
                                                bias=bias, batch_first=batch_first,
                                                **factory_kwargs)
 
-    def forward(self, q, k, v,
-                is_causal: bool = False):
+    def forward(self, q, k, v, is_causal: bool = False):
         q, k, v = map(self.norm1, (q, k, v))
         x = v + self._sa_block(q, k, v)
         x = x + self._ff_block(self.norm2(x))
