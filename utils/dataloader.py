@@ -1,9 +1,9 @@
+from typing import List, Tuple
+from omegaconf import DictConfig, open_dict
 import numpy as np
 import torch
 import torch.nn.functional as F
 from torch.utils.data import Dataset, DataLoader
-from typing import List, Tuple
-from omegaconf import DictConfig, open_dict
 
 
 class ABIDE_Dataset(Dataset):
@@ -14,7 +14,20 @@ class ABIDE_Dataset(Dataset):
         self.y_data = F.one_hot(torch.FloatTensor(y_data).to(torch.int64))
         self.len = self.y_data.shape[0]
 
-    def __getitem__(self, index) -> Tuple[torch.Tensor, torch.Tensor]:
+    def __getitem__(self, index: int) -> Tuple[torch.Tensor, torch.Tensor]:
+        return self.x_data[index], self.y_data[index]
+
+    def __len__(self) -> int:
+        return self.len
+
+
+class BNT_Dataset(Dataset):
+    def __init__(self, x_data: np.ndarray, y_data: np.ndarray) -> None:
+        self.x_data = torch.FloatTensor(x_data)
+        self.y_data = F.one_hot(torch.FloatTensor(y_data).to(torch.int64))
+        self.len = self.y_data.shape[0]
+
+    def __getitem__(self, index: int) -> Tuple[torch.Tensor, torch.Tensor]:
         return self.x_data[index], self.y_data[index]
 
     def __len__(self) -> int:
@@ -75,25 +88,8 @@ def continuous_mixup_data(
         alpha: float = 1.0,
         device: str = 'cuda'
 ) -> Tuple[Tuple[torch.Tensor, ...], torch.Tensor]:
-    """
-    Applies mixup augmentation to the inputs and targets.
-
-    Args:
-        *xs: Variable number of input tensors.
-        y: Target tensor.
-        alpha: Mixup interpolation coefficient. Default is 1.0.
-        device: Device to perform the operation on. Default is 'cuda'.
-
-    Returns:
-        Tuple containing:
-            - Mixed inputs (tuple of tensors)
-            - Mixed targets (tensor)
-    """
-    if alpha > 0:
-        lam = np.random.beta(alpha, alpha)
-    else:
-        lam = 1.0
-
+    """Applies mixup augmentation to the inputs and targets."""
+    lam = np.random.beta(alpha, alpha) if alpha > 0 else 1.0
     batch_size = y.size(0)
     index = torch.randperm(batch_size).to(device)
 
