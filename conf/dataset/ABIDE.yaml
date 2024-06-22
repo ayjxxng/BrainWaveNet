@@ -1,7 +1,7 @@
 name: abide
 path: ./BWN/data/
-train_valid_data: ./BWN/data/cmor_train_valid_F5.pkl
-test_data: ./BWN/data/cmor_test_F5.pkl
+train_valid_data: ./BWN/data/cmor_train_valid_CWT_TR5.pkl
+test_data: ./BWN/data/cmor_test_CWT_TR5.pkl
 
 train_set: 0.7
 valid_set: 0.2
