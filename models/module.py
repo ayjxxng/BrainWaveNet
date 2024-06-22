@@ -7,7 +7,10 @@ device = torch.device("cuda")
 
 
 class Res2DModule(nn.Module):
-    def __init__(self, cfg):
+    def __init__(
+            self,
+            cfg: DictConfig
+    ) -> None:
         super().__init__()
         self.in_channels = cfg.model.in_channels
         self.out_channels = cfg.model.out_channels
@@ -19,7 +22,10 @@ class Res2DModule(nn.Module):
             self.bn_2 = nn.BatchNorm2d(self.out_channels)
         self.relu = nn.ReLU()
 
-    def forward(self, x):
+    def forward(
+            self, 
+            x: torch.Tensor
+    ) -> torch.Tensor:
         out = self.conv_1(x)
         if self.batch_norm:
             out = self.bn_1(out)
@@ -34,7 +40,7 @@ class TemporalEnc(nn.Module):
     def __init__(
             self,
             cfg: DictConfig
-    ):
+    ) -> None:
         super().__init__()
         self.cfg = cfg.model
         self.D = self.cfg.embed_dim
@@ -59,7 +65,10 @@ class TemporalEnc(nn.Module):
         ])
         self.temporal_linear_out = nn.Linear(self.cfg.temporal_dmodel, self.F + 1, dtype=cfloat)
 
-    def forward(self, temp_in):
+    def forward(
+            self, 
+            temp_in: torch.Tensor
+    ) -> torch.Tensor:
         """
         Inputs:
             temp_in: temporal embedding input [B, N+1, F+1, T]
@@ -88,7 +97,7 @@ class SpatialEnc(nn.Module):
     def __init__(
             self,
             cfg: DictConfig
-    ):
+    ) -> None:
         super().__init__()
         self.cfg = cfg.model
         self.D = self.cfg.embed_dim
@@ -113,7 +122,10 @@ class SpatialEnc(nn.Module):
         ])
         self.spatial_linear_out = nn.Linear(self.cfg.spatial_dmodel, self.D, dtype=cfloat, device=device)
 
-    def forward(self, spat_in):
+    def forward(
+            self, 
+            spat_in: torch.Tensor
+    ) -> torch.Tensor:
         """
         Inputs:
             spat_in: spatial embedding input [B, N+1, 1, D]
