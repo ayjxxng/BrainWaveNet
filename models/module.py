@@ -155,7 +155,6 @@ class Cross_TransformerEncoderLayer(nn.TransformerEncoderLayer):
         x = x + self._ff_block(self.norm2(x))
         return x
 
-    # self-attention block
     def _sa_block(self, q, k, v,
                   attn_mask=None, key_padding_mask=None, is_causal: bool = False) -> Tensor:
         x = self.self_attn(q, k, v,
