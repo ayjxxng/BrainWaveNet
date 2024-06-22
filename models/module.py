@@ -163,3 +163,4 @@ class Cross_TransformerEncoderLayer(nn.TransformerEncoderLayer):
                            key_padding_mask=key_padding_mask,
                            need_weights=False, is_causal=is_causal)[0]
         return self.dropout1(x)
+                      
