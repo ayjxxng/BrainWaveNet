@@ -2,7 +2,7 @@
 A. Jeong*, D. Heo*, E. Kang, and H.-I. Suk, “BrainWaveNet: Wavelet-based Transformer for Autism Spectrum Disorder Diagnosis,” *In Proceedings of the Medical Image Computing and Computer-Assisted Intervention (MICCAI)*, Marrakesh, Morocco, Oct. 6-10, 2024.
 
 ## Perfomance
-Dataset: ABIDE-I
+### Dataset: ABIDE-I
 | Method | AUC | ACC (%) | SEN (%) | SPC (%) |
 | :---: | :---: | :---: | :---: | :---: |
 | BrainNetCNN  | 0.6907 ± 0.01 | 64.36 ± 1.19 | 53.40 ± 3.79 | **75.32 ± 2.31** |
@@ -12,7 +12,7 @@ Dataset: ABIDE-I
 | BoIT         | 0.6989 ± 0.02 | 62.66 ± 3.54 | 55.32 ± 5.53 | 70.00 ± 3.31 |
 | BrainWaveNet (Ours) | **0.7388 ± 0.02** | **67.55 ± 2.04** | **66.49 ± 9.17** | 68.35 ± 9.80 |
 
-Dataset: ADHD-200
+### Dataset: ADHD-200
 | Method | AUC | ACC (%) | SEN (%) | SPC (%) |
 | :---: | :---: | :---: | :---: | :---: |
 | BrainNetCNN  | 0.6428 ± 0.01 | 62.06 ± 1.12 | 35.48 ± 4.56 | **82.36 ± 3.25** |
