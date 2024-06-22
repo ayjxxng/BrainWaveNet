@@ -1,0 +1,17 @@
+defaults:
+  - dataset: ABIDE
+  - model: bwn
+  - optimizer: adam
+  - training: basic
+
+main_path: ./BWN
+checkpoints: ./BWN/checkpoints
+
+gpu: 0
+seed: 42
+test: true
+
+n_fold: 5
+
+wandb: true
+project: ABIDE_BWN
