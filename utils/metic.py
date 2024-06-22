@@ -4,15 +4,17 @@ import torch.nn.functional as F
 from sklearn.metrics import confusion_matrix, roc_auc_score, accuracy_score
 
 
-def get_pred(predictions):
+def get_pred(predictions: List[torch.Tensor]) -> Tuple[torch.Tensor, torch.Tensor]:
+    """Calculate predictions and probabilities from model outputs."""
     stack = torch.from_numpy(np.vstack(predictions))
-    _, preds = torch.max(F.softmax(stack, -1).data, -1) 
+    _, preds = torch.max(F.softmax(stack, -1).data, -1)
     proba = F.softmax(stack, -1).data[:, 1:].squeeze(-1)
 
     return preds, proba
 
 
-def confusion(g_true, predictions):
+def confusion(g_true: List[torch.Tensor], predictions: List[torch.Tensor]) -> Tuple[float, ...]:
+    """Calculate confusion matrix metrics from ground truth and predictions."""
     pred, prob = get_pred(predictions)
     g_true = torch.from_numpy(np.vstack(g_true))
     _, lab = torch.max(g_true, -1)
@@ -28,3 +30,4 @@ def confusion(g_true, predictions):
     f1 = 2 * (precision * recall) / (precision + recall)
 
     return acc, sens, spec, auc, f1, recall, precision
+    
