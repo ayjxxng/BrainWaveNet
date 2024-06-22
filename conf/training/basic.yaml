@@ -1,0 +1,8 @@
+name: basic
+
+num_workers: 4
+train_epochs: 20
+batch_size: 32
+patience: 10
+
+mixup_data: true
