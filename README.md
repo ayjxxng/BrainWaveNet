@@ -1,5 +1,5 @@
 # BrainWaveNet
-BrainWaveNet: Wavelet-based Transformer for Autism Spectrum Disorder Diagnosis
+A. Jeong*, D. Heo*, E. Kang, and H.-I. Suk, “BrainWaveNet: Wavelet-based Transformer for Autism Spectrum Disorder Diagnosis,” *In Proceedings of the Medical Image Computing and Computer-Assisted Intervention (MICCAI)*, Marrakesh, Morocco, Oct. 6-10, 2024.
 
 ## Perfomance
 Dataset: ADHD-200
