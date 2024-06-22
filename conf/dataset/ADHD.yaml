@@ -1,0 +1,14 @@
+name: adhd
+path: ./BWN/data/
+train_valid_data: ./BWN/data/adhd200_train_valid_CWT_TR5.pkl
+test_data: ./BWN/data/adhd200_test_CWT_TR5.pkl
+
+train_set: 0.7
+valid_set: 0.2
+test_set: 0.1
+
+n_channels: 200
+n_frequencies: 5
+n_times: 76
+
+n_classes: 2
