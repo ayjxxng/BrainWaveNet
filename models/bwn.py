@@ -132,10 +132,7 @@ class BrainWaveNet(nn.Module):
         # Linear layer
         self.linear_out = nn.Linear(self.D * 2, self.n_classes)
 
-    def forward(
-            self,
-            features: torch.Tensor
-    ) -> torch.Tensor:
+    def forward(self, features: torch.Tensor) -> torch.Tensor:
         """
         Input:
             features: [B, T, F, N, 2] (Real&Imag)
@@ -154,5 +151,7 @@ class BrainWaveNet(nn.Module):
         _, spat_emb = self.main_model(fe_out_real, fe_out_imag)
         out = torch.stack([spat_emb.real[:, 0, 0, :], spat_emb.imag[:, 0, 0, :]], dim=-1)
         out = self.linear_out(out.reshape(out.size(0), -1))
+
+        return out
         
         return out
