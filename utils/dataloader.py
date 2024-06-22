@@ -21,6 +21,19 @@ class ABIDE_Dataset(Dataset):
         return self.len
 
 
+class BNT_Dataset(Dataset):
+    def __init__(self, x_data: np.ndarray, y_data: np.ndarray) -> None:
+        self.x_data = torch.FloatTensor(x_data)
+        self.y_data = F.one_hot(torch.FloatTensor(y_data).to(torch.int64))
+        self.len = self.y_data.shape[0]
+
+    def __getitem__(self, index: int) -> Tuple[torch.Tensor, torch.Tensor]:
+        return self.x_data[index], self.y_data[index]
+
+    def __len__(self) -> int:
+        return self.len
+
+
 def get_dataloader(
         cfg: DictConfig,
         samples: np.ndarray,
@@ -74,13 +87,12 @@ def continuous_mixup_data(
         y: torch.Tensor,
         alpha: float = 1.0,
         device: str = 'cuda'
-) -> Tuple[Tuple[torch.Tensor, ...], torch.Tensor]:
+) -> Tuple[torch.Tensor, torch.Tensor]:
     """Applies mixup augmentation to the inputs and targets."""
     lam = np.random.beta(alpha, alpha) if alpha > 0 else 1.0
     batch_size = y.size(0)
     index = torch.randperm(batch_size).to(device)
 
-    mixed_xs = tuple(lam * x + (1 - lam) * x[index] for x in xs)
-    mixed_y = lam * y + (1 - lam) * y[index]
-
-    return mixed_xs, mixed_y
+    new_xs = [lam * x + (1 - lam) * x[index, :] for x in xs]
+    y = lam * y + (1-lam) * y[index]
+    return *new_xs, y
