@@ -59,11 +59,11 @@ class TemporalEnc(nn.Module):
 
     def forward(self, temp_in: torch.Tensor) -> torch.Tensor:
         """
-        Inputs:
-            temp_in: temporal embedding input [B, N+1, F+1, T]
+        Args:
+            temp_in: Temporal embedding input of shape [B, N+1, F+1, T]
 
-        Outputs:
-            temp_out: temporal embedding output [B, N+1, F+1, T]
+        Returns:
+            temp_out: Temporal embedding output of shape [B, N+1, F+1, T]
         """
         # TemporalEnc in
         temp_in = temp_in.flatten(0, 1).transpose(1, 2)
@@ -111,11 +111,11 @@ class SpatialEnc(nn.Module):
 
     def forward(self, spat_in: torch.Tensor) -> torch.Tensor:
         """
-        Inputs:
-            spat_in: spatial embedding input [B, N+1, 1, D]
+        Args:
+            spat_in: Spatial embedding input of shape [B, N+1, 1, D]
 
-        Outputs:
-            spat_out: spatial embedding output [B, N+1, 1, D]
+        Returns:
+            spat_out: Spatial embedding output of shape [B, N+1, 1, D]
         """
         # SpatialEnc in
         spat_in = spat_in.permute(0, 2, 1, 3).flatten(0, 1)
