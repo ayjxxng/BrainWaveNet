@@ -1,116 +1,107 @@
 import os
-import random
+import pickle
+import warnings
 from datetime import datetime
 import torch
-import numpy as np
-from omegaconf import open_dict
-from sklearn.model_selection import StratifiedShuffleSplit
 import wandb
-from training import Train
+import hydra
+from omegaconf import DictConfig, open_dict, omegaconf
+from sklearn.model_selection import StratifiedShuffleSplit
+import gc
 
-from utils.dataloader import get_dataloader
-from models.brainwavenet import BrainWaveNet
-from config import get_args
-device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-print(device)
+from utils.dataloader import init_dataloader
+from utils.utils import init_setting, Logger
+from training.training import build_model, Train
+
+warnings.filterwarnings('ignore')
+wandb.require("core")
 
 
-fix_seed = 42
-random.seed(fix_seed)
-torch.manual_seed(fix_seed)
-np.random.seed(fix_seed)
+@hydra.main(version_base=None, config_path="conf", config_name="config")
+def main(cfg: DictConfig) -> None:
+    # Initialize settings
+    unique_id = datetime.now().strftime("%m-%d-%H-%M")
+    init_setting(cfg)
 
-args = get_args()
+    # Load datasets
+    train_valid_data, train_valid_labs, train_valid_keys = pickle.load(open(cfg.dataset.train_valid_data, 'rb'))
+    test_data, test_labs, _ = pickle.load(open(cfg.dataset.test_data, 'rb'))
 
-train_val_CWT = pickle.load(open(args.dataset.path + 'train_val_CWT_TR.pkl', 'rb'))
-train_val_data, train_val_labs, train_val_keys = train_val_CWT
-test_CWT = pickle.load(open(args.dataset.path + 'test_CWT_TR.pkl', 'rb'))
-test_data, test_labs, test_keys = test_CWT
+    length = len(train_valid_data) + len(test_data)
+    val_length = int(length * cfg.dataset.valid_set)
+    with open_dict(cfg):
+        cfg.val_length = val_length
 
-with open_dict(args):
-    args.unique_id = datetime.now().strftime("%d-%H%M")
+    # setting record of experiments
+    setting = 'B{}T{}S{}_E{}_T{}H{}F{}_S{}H{}F{}_E{}B{}_D{}_LR{}_D{}'.format(cfg.model.n_blocks,
+                                                                             cfg.model.n_temporal_blocks,
+                                                                             cfg.model.n_spatial_blocks,
+                                                                             cfg.model.embed_dim,
+                                                                             cfg.model.temporal_dmodel,
+                                                                             cfg.model.temporal_nheads,
+                                                                             cfg.model.temporal_dim_factor,
+                                                                             cfg.model.spatial_dmodel,
+                                                                             cfg.model.spatial_nheads,
+                                                                             cfg.model.spatial_dim_factor,
+                                                                             cfg.training.train_epochs,
+                                                                             cfg.training.batch_size,
+                                                                             cfg.model.dropout,
+                                                                             cfg.optimizer.lr,
+                                                                             cfg.optimizer.weight_decay
+                                                                             )
+    unique_id = '{}_{}'.format(unique_id, setting)
+    path = os.path.join(cfg.checkpoints, unique_id)
+    with open_dict(cfg):
+        cfg.unique_id = unique_id
+        cfg.path = path
+    os.makedirs(path, exist_ok=True)
 
-if args.is_training:
-    for ii in range(args.itr):
-        # setting record of experiments
-        setting = '{}-S{}_{}-E{}-T{}_{}'.format(args.unique_id,
-                                            args.temporal_dmodel,
-                                            args.temporal_nheads,
-                                            args.embed_dim,
-                                            args.spatial_dmodel,
-                                            args.spatial_nheads)
-        path = os.path.join(args.checkpoints, setting) 
-        if not os.path.exists(path):
-            os.makedirs(path)
-        test_log_filepath = os.path.join(path, 'test_result.csv')
-        with open(test_log_filepath, 'a') as f:
-            f.write('Fold,Loss,Accuracy,Sensitivity,Specificity,AUC,F1,Recall,Precision\n')
+    logger = Logger(cfg)
+    logger.init_logging()
 
-        split2 = StratifiedShuffleSplit(n_splits=args.n_fold, test_size=args.val_length)
-        for kk, (train_index, val_index) in enumerate(split2.split(train_val_data, train_val_keys)):
-            if args.wandb:
-                wandb.init(project=args.project,
-                        group=args.unique_id,
-                            name=f"F{kk+1}",
-                            config={
-                                "unique_id": args.unique_id,
-                                "epochs": args.train_epochs,
-                                "batch_size": args.batch_size,
-                                "n_fold": args.n_fold,
+    all_results = []
+    split = StratifiedShuffleSplit(n_splits=cfg.n_fold, test_size=cfg.val_length, random_state=cfg.seed)
+    for fold, (train_index, valid_index) in enumerate(split.split(train_valid_data, train_valid_keys)):
+        init_setting(cfg)
+        if cfg.wandb:
+            wandb.init(project=cfg.project,
+                       group=unique_id,
+                       name=f"{unique_id}:F{fold + 1}",
+                       config=omegaconf.OmegaConf.to_container(cfg, resolve=True, throw_on_missing=True),
+                       reinit=True,
+                       )
+        print(f"<<<<<<<<<<<<< Fold[{fold + 1}/{cfg.n_fold}] >>>>>>>>>>>>>")
+        dataloaders = init_dataloader(
+            cfg=cfg,
+            train_idx=train_index,
+            valid_idx=valid_index,
+            train_valid_samples=train_valid_data,
+            train_valid_labels=train_valid_labs,
+            test_samples=test_data,
+            test_labels=test_labs
+        )
+        model = build_model(cfg)
+        train_model = Train(
+            cfg=cfg,
+            model=model,
+            dataloaders=dataloaders,
+            fold=fold,
+            logger=logger
+        )
+        final_result = train_model.train()
+        all_results.append(final_result)
+        
+        if cfg.wandb:
+            wandb.finish()
 
-                                "front_end": args.front_end,
-                                "n_channels": args.n_channels,
-                                "n_frequencies": args.n_frequencies,
-                                "n_times": args.n_times,
-                                "pooling": args.pooling,
-                                "stride": args.stride,
+        gc.collect()
+        torch.cuda.empty_cache()
 
-                                "embed_dim": args.embed_dim,
-                                "temporal_dmodel": args.temporal_dmodel,
-                                "temporal_nheads": args.temporal_nheads,
-                                "temporal_dimff": args.temporal_dimff,
+    logger.log_results(all_results=all_results)
+    gc.collect()
+    torch.cuda.empty_cache()
 
-                                "spatial_dmodel": args.spatial_dmodel,
-                                "spatial_nheads": args.spatial_nheads,
-                                "spatial_dimff": args.spatial_dimff,
 
-                                "dropout": args.dropout,
-                                "n_blocks": args.n_blocks,
-
-                                "weight_decay": args.weight_decay,
-                                "learning_rate": args.optimizer.lr,
-                                "target_lr": args.optimizer.lr_scheduler.target_lr,
-                                "weight_decay": args.weight_decay,
-                                },
-                        reinit=True,
-                        tags=[args.unique_id,
-                            f"emb_d{args.embed_dim}",
-                            f"tem_d{args.temporal_dmodel}",
-                            f"spa_d{args.spatial_dmodel}"])
-            print(f"<<<<<<<<<<<<< Fold[{kk+1}/{args.n_fold}] >>>>>>>>>>>>>")
-            train_loader= get_dataloader(args, train_val_data[train_index], train_val_labs[train_index], shuffle=True)
-            val_loader= get_dataloader(args, train_val_data[val_index], train_val_labs[val_index], shuffle=False)
-            test_loader = get_dataloader(args, test_data, test_labs, shuffle=False)
-            with open_dict(args):
-                args.steps_per_epoch = len(train_loader)
-                args.total_steps = args.steps_per_epoch * args.train_epochs
-            dataloaders = [train_loader, val_loader, test_loader]
-
-            model = BrainWaveNet(args)
-            model = model.to(device)
-            total_params = 0
-            for name, parameter in model.named_parameters():
-                if not parameter.requires_grad: continue
-                param = parameter.numel()
-                total_params += param
-            print(f"Total Trainable Params: {total_params}")
-
-            if args.wandb:
-                wandb.config.update({"total_params": total_params})
-
-            train_model = Train(args, model, dataloaders, kk, path)
-            train_model.train()
-            if args.wandb:
-                wandb.finish()
-                
-torch.cuda.empty_cache()
+if __name__ == '__main__':
+    main()
+    
