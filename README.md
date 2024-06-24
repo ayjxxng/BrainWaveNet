@@ -1,4 +1,5 @@
 # BrainWaveNet
+A. Jeong*, D. Heo*, E. Kang, and H.-I. Suk, “BrainWaveNet: Wavelet-based Transformer for Autism Spectrum Disorder Diagnosis,” *Medical Image Computing and Computer Assisted Intervention (MICCAI)*, Marrakesh, Morocco, Oct. 6-10, 2024.
 
 <p align="center"><img src = "https://github.com/ayjxxng/BrainWaveNet/assets/113572871/81942f61-48f8-483f-ba3a-8cc9c9ff1a94" width="85%" height="85%"></p>
 
