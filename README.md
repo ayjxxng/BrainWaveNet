@@ -36,7 +36,7 @@ A. Jeong*, D. Heo*, E. Kang, and H.-I. Suk, “BrainWaveNet: Wavelet-based Tran
 - hydra-core 1.3.2
 
 ## Citation
-Jeong, et al. "BrainWaveNet: Wavelet-based Transformer for Autism Spectrum Disorder Diagnosis" Medical Image Computing and Computer Assisted Intervention, 2024
+Jeong, et al. "BrainWaveNet: Wavelet-based Transformer for Autism Spectrum Disorder Diagnosis," *Medical Image Computing and Computer Assisted Intervention*, 2024
 
 
 ## Acknowledgments
