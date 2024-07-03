@@ -36,6 +36,7 @@ A. Jeong*, D. Heo*, E. Kang, and H.-I. Suk, “BrainWaveNet: Wavelet-based Tran
 - hydra-core 1.3.2
 
 ## Citation
+Jeong
 
 
 ## Acknowledgments
