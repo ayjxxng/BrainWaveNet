@@ -31,6 +31,22 @@ class Res2DModule(nn.Module):
         return x + out
 
 
+class ComplexLinear(nn.Module):
+    """
+    This module is different from a typical complex-valued linear layer,
+    as it performs linear operations on the real and imaginary parts independently.
+    """
+    def __init__(self, in_features: int, out_features: int) -> None:
+        super().__init__()
+        self.linear_real = nn.Linear(in_features, out_features)
+        self.linear_imag = nn.Linear(in_features, out_features)
+
+    def forward(self, x: torch.Tensor) -> torch.Tensor:
+        real_part = self.linear_real(x.real)
+        imag_part = self.linear_imag(x.imag)
+        return torch.complex(real_part, imag_part)
+
+
 class TemporalEnc(nn.Module):
     def __init__(self, cfg: DictConfig) -> None:
         super().__init__()
@@ -42,7 +58,7 @@ class TemporalEnc(nn.Module):
         self.temporal_dimff = self.cfg.temporal_dmodel * self.cfg.temporal_dim_factor
 
         # Temporal Transformer Encoder (TemporalEnc)
-        self.temporal_linear_in = nn.Linear(self.F + 1, self.cfg.temporal_dmodel, dtype=cfloat)
+        self.temporal_linear_in = ComplexLinear(self.F + 1, self.cfg.temporal_dmodel)
         self.temporal_encoder_layers_real = nn.ModuleList([
             nn.TransformerEncoderLayer(
                 d_model=self.cfg.temporal_dmodel, nhead=self.cfg.temporal_nheads, dim_feedforward=self.temporal_dimff,
@@ -55,7 +71,7 @@ class TemporalEnc(nn.Module):
                 dropout=self.cfg.dropout, batch_first=True, activation="gelu", norm_first=True
             ) for _ in range(self.cfg.n_temporal_blocks)
         ])
-        self.temporal_linear_out = nn.Linear(self.cfg.temporal_dmodel, self.F + 1, dtype=cfloat)
+        self.temporal_linear_out = ComplexLinear(self.cfg.temporal_dmodel, self.F + 1)
 
     def forward(self, temp_in: torch.Tensor) -> torch.Tensor:
         """
@@ -94,7 +110,7 @@ class SpatialEnc(nn.Module):
         self.spatial_dimff = self.cfg.spatial_dmodel * self.cfg.spatial_dim_factor
 
         # Spatial Transformer Encoder (SpatialEnc)
-        self.spatial_linear_in = nn.Linear(self.D, self.cfg.spatial_dmodel, dtype=cfloat)
+        self.spatial_linear_in = ComplexLinear(self.D, self.cfg.spatial_dmodel)
         self.spatial_encoder_layers_real = nn.ModuleList([
             Cross_TransformerEncoderLayer(
                 d_model=self.cfg.spatial_dmodel, nhead=self.cfg.spatial_nheads, dim_feedforward=self.spatial_dimff,
@@ -107,7 +123,7 @@ class SpatialEnc(nn.Module):
                 dropout=self.cfg.dropout, batch_first=True, activation="gelu", norm_first=True
             ) for _ in range(self.cfg.n_spatial_blocks)
         ])
-        self.spatial_linear_out = nn.Linear(self.cfg.spatial_dmodel, self.D, dtype=cfloat, device=device)
+        self.spatial_linear_out = ComplexLinear(self.cfg.spatial_dmodel, self.D)
 
     def forward(self, spat_in: torch.Tensor) -> torch.Tensor:
         """
