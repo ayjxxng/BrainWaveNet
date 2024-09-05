@@ -3,17 +3,17 @@ in_channels: 200
 out_channels: 200
 batch_norm: true
 
-embed_dim: 512
+embed_dim: 128
 
 n_temporal_blocks: 3
-temporal_dmodel: 16
+temporal_dmodel: 32
 temporal_nheads: 4
 temporal_dim_factor: 1
 
 n_spatial_blocks: 1
 spatial_dmodel: 64
 spatial_nheads: 8
-spatial_dim_factor: 2
+spatial_dim_factor: 1
 
 dropout: 0.3
 n_blocks: 2
