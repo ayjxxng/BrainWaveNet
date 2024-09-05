@@ -2,7 +2,7 @@ from typing import Tuple
 import torch
 from torch import nn, cfloat
 from omegaconf import DictConfig
-from models.module import TemporalEnc, SpatialEnc, Res2DModule
+from models.module import TemporalEnc, SpatialEnc, Res2DModule, ComplexLinear
 
 device = torch.device("cuda")
 
@@ -16,8 +16,8 @@ class TS_Encoder(nn.Module):
         self.T = cfg.dataset.n_times
 
         # Linear Layers
-        self.D_to_T = nn.Linear(self.D, self.T, dtype=cfloat)
-        self.T_to_D = nn.Linear(self.T, self.D, dtype=cfloat)
+        self.D_to_T = ComplexLinear(self.D, self.T)
+        self.T_to_D = ComplexLinear(self.T, self.D)
 
         # Temporal Transformer Encoder (TemporalEnc)
         self.temporal_blocks = TemporalEnc(cfg)
@@ -62,16 +62,20 @@ class WaveletTF(nn.Module):
         self.T = cfg.dataset.n_times
 
         # FCT: Frequency Class Token
-        self.fct = nn.Parameter(torch.zeros((1, self.N, 1, self.T), dtype=cfloat))
+        self.fct_real = nn.Parameter(torch.zeros((1, self.N, 1, self.T)))
+        self.fct_imag = nn.Parameter(torch.zeros((1, self.N, 1, self.T)))
 
         # Frequency Positional Encoding
-        self.fpe = nn.Parameter(torch.zeros((1, 1, self.F + 1, self.T), dtype=cfloat))
+        self.fpe_real = nn.Parameter(torch.zeros((1, 1, self.F + 1, self.T)))
+        self.fpe_imag = nn.Parameter(torch.zeros((1, 1, self.F + 1, self.T)))
 
         # SCT: Spatial Class Token
-        self.sct = nn.Parameter(torch.zeros((1, 1, 1, self.D), dtype=cfloat))
+        self.sct_real = nn.Parameter(torch.zeros((1, 1, 1, self.D)))
+        self.sct_imag = nn.Parameter(torch.zeros((1, 1, 1, self.D)))
 
         # Spatial Embedding
-        self.se = nn.Parameter(torch.rand((1, self.N, 1, self.D), dtype=cfloat))
+        self.se_real = nn.Parameter(torch.rand((1, self.N, 1, self.D)))
+        self.se_imag = nn.Parameter(torch.rand((1, self.N, 1, self.D)))
 
         # WaveletTF blocks
         self.waveletTF_block = nn.ModuleList([
@@ -95,14 +99,20 @@ class WaveletTF(nn.Module):
         x = torch.complex(x_real, x_imag).to(device)
 
         # Initialize temporal embedding - concat FCT (first raw) + add FPE
-        fct = torch.repeat_interleave(self.fct, batch_size, 0).to(device)
+        fct = torch.repeat_interleave(
+            torch.complex(self.fct_real, self.fct_imag), batch_size, 0
+        ).to(device)
         temp_emb = torch.cat([fct, x], dim=2)
-        temp_emb = temp_emb + self.fpe
+        temp_emb = temp_emb + torch.complex(self.fpe_real, self.fpe_imag)
         temp_emb = nn.functional.pad(temp_emb, (0, 0, 0, 0, 1, 0))
 
         # Initialize spatial embedding
-        spat_emb = torch.repeat_interleave(self.se, batch_size, 0).to(device)
-        sct = torch.repeat_interleave(self.sct, batch_size, 0).to(device)
+        spat_emb = torch.repeat_interleave(
+            torch.complex(self.se_real, self.se_imag), batch_size, 0
+        ).to(device) 
+        sct = torch.repeat_interleave(
+            torch.complex(self.sct_real, self.sct_imag), batch_size, 0
+        ).to(device)
         spat_emb = torch.cat([sct, spat_emb], dim=1)
 
         # WaveletTF blocks inference
