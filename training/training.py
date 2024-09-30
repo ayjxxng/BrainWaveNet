@@ -23,19 +23,15 @@ device = torch.device("cuda")
 
 class Train:
     def __init__(
-            self,
-            cfg: DictConfig,
-            model: nn.Module,
-            dataloaders: List[DataLoader],
-            fold: int,
-            logger: Logger,
+            self, cfg: DictConfig, fold: int, model: nn.Module,
+            dataloaders: List[DataLoader], logger: Logger,
     ) -> None:
         self.current_step = 0
         self.cfg = cfg
+        self.fold = fold
         self.model = model
         self.train_dataloader, self.val_dataloader, self.test_dataloader = dataloaders
         self.epochs = cfg.training.train_epochs
-        self.fold = fold
         self.logger = logger
         self.path = cfg.path
         self.save_path = os.path.join(self.path, f'Fold_{self.fold + 1}')
