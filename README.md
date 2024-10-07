@@ -36,7 +36,7 @@ A. Jeong*, D. Heo*, E. Kang, and H.-I. Suk, “BrainWaveNet: Wavelet-based Tran
 - hydra-core 1.3.2
 
 ## Citation
-'''
+```
 @InProceedings{Jeo_BrainWaveNet_MICCAI2024,
         author = { Jeong, Ah-Yeong and Heo, Da-Woon and Kang, Eunsong and Suk, Heung-Il},
         title = { { BrainWaveNet: Wavelet-based Transformer for Autism Spectrum Disorder Diagnosis } },
@@ -47,7 +47,7 @@ A. Jeong*, D. Heo*, E. Kang, and H.-I. Suk, “BrainWaveNet: Wavelet-based Tran
         month = {October},
         page = {pending}
 }
-'''
+```
 
 ## Acknowledgments
 This work was supported by Institute of Information & communications Technology Planning & Evaluation (IITP) grant funded by the Korea government (MSIT) (No. RS-2019-II190079, Artificial Intelligence Graduate School Program (Korea University)) and the National Research Foundation of Korea (NRF) grant funded by the Korea government (No. 2022R1A4A1033856).
