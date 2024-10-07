@@ -3,8 +3,8 @@
 <p align="center"><img src = "https://github.com/ayjxxng/BrainWaveNet/assets/113572871/37dfa68c-a5c8-4e83-a846-e53fe060b74b" width="85%" height="85%"></p>
 
 > **BrainWaveNet: Wavelet-based Transformer for Autism Spectrum Disorder Diagnosis** <br>
-> Ah-Yeong Jeong*, Da-Woon Heo*, Eunsong Kang, and Heung-Il Suk^†^ <br>
-> *Equally contributed, ^†^Corresponding author <br>
+> Ah-Yeong Jeong*, Da-Woon Heo*, Eunsong Kang, and Heung-Il Suk<sup>†</sup> <br>
+> *Equally contributed, <sup>†</sup>Corresponding author <br>
 >
 > **Abstract.** The diagnosis of Autism Spectrum Disorder (ASD) using resting-state functional Magnetic Resonance Imaging (rs-fMRI) is commonly analyzed through functional connectivity (FC) between Regions of Interest (ROIs) in the time domain. However, the time domain has limitations in capturing global information. To overcome this problem, we propose a wavelet-based Transformer, BrainWaveNet, that leverages the frequency domain and learns spatial-temporal information for rs-fMRI brain diagnosis. Specifically, BrainWaveNet learns inter-relations between two different frequency-based features (real and imaginary parts) by crossattention mechanisms, which allows for a deeper exploration of ASD. In our experiments using the ABIDE dataset, we validated the superiority of BrainWaveNet by comparing it with competing deep learning methods. Furthermore, we analyzed significant regions of ASD for neurological interpretation.
 
