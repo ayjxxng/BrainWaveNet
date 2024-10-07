@@ -1,4 +1,4 @@
-# BrainWaveNet: Wavelet-based Transformer for Autism Spectrum Disorder Diagnosis,” *Medical Image Computing and Computer Assisted Intervention (MICCAI'24 Oral)
+# BrainWaveNet: Wavelet-based Transformer for Autism Spectrum Disorder Diagnosis (MICCAI'24 Oral)
 <div align="center">
 A. Jeong*, D. Heo*, E. Kang, and H.-I. Suk
 </div>
